@@ -1,0 +1,65 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - heading "Family Bridge" [level=1] [ref=e5]
+        - paragraph [ref=e6]: Staff Portal
+      - navigation [ref=e7]:
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - link "Dashboard" [ref=e10] [cursor=pointer]:
+              - /url: /admin
+              - img [ref=e11]
+              - generic [ref=e16]: Dashboard
+          - listitem [ref=e17]:
+            - link "Feedback" [ref=e18] [cursor=pointer]:
+              - /url: /admin/feedback
+              - img [ref=e19]
+              - generic [ref=e21]: Feedback
+          - listitem [ref=e22]:
+            - link "Residents" [ref=e23] [cursor=pointer]:
+              - /url: /admin/residents
+              - img [ref=e24]
+              - generic [ref=e29]: Residents
+          - listitem [ref=e30]:
+            - link "Settings" [ref=e31] [cursor=pointer]:
+              - /url: /admin/settings
+              - img [ref=e32]
+              - generic [ref=e35]: Settings
+      - generic [ref=e37]:
+        - generic [ref=e38]: AS
+        - generic [ref=e39]:
+          - paragraph [ref=e40]: Admin Staff
+          - paragraph [ref=e41]: Connected to Supabase
+    - main [ref=e42]:
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - heading "Feedback Intelligence" [level=1] [ref=e46]
+            - paragraph [ref=e47]: Manage resident voices amplified by AI analysis.
+          - generic [ref=e48]:
+            - combobox [ref=e49]:
+              - option "All Feedbacks" [selected]
+              - option "New Entries"
+              - option "AI Analyzed"
+              - option "Completed"
+            - button "Refresh" [ref=e50]
+        - generic [ref=e52]:
+          - img [ref=e54]
+          - paragraph [ref=e56]: Everything clear! No feedback matching your filters.
+  - generic [ref=e61] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e62]:
+      - img [ref=e63]
+    - generic [ref=e66]:
+      - button "Open issues overlay" [ref=e67]:
+        - generic [ref=e68]:
+          - generic [ref=e69]: "0"
+          - generic [ref=e70]: "1"
+        - generic [ref=e71]: Issue
+      - button "Collapse issues badge" [ref=e72]:
+        - img [ref=e73]
+  - alert [ref=e75]
+```

@@ -73,9 +73,50 @@ CREATE TABLE IF NOT EXISTS public.feedback (
     user_id uuid REFERENCES public.profiles(id) NOT NULL,
     category text CHECK (category IN ('Dining', 'Temperature', 'Activity', 'Staff', 'General')),
     content text NOT NULL,
-    status text DEFAULT 'new' CHECK (status IN ('new', 'resolved')),
+    status text DEFAULT 'submitted' CHECK (status IN ('submitted', 'ai_processed', 'in_review', 'responded', 'resolved')),
+    
+    -- AI Analysis Fields
+    ai_category text,
+    ai_priority text,
+    ai_sentiment text,
+    ai_summary text,
+    ai_draft text,
+    ai_confidence double precision,
+    ai_processed_at timestamptz,
+    
+    -- Admin/Final Response Fields
+    final_category text,
+    final_priority text,
+    response text,
+    responded_by uuid REFERENCES public.profiles(id),
+    responded_at timestamptz,
+    
     created_at timestamptz DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- AI PROCESSING LOG: GPT-4o-mini performance tracking
+CREATE TABLE IF NOT EXISTS public.ai_processing_log (
+    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    feedback_id uuid REFERENCES public.feedback(id) ON DELETE CASCADE NOT NULL,
+    model_used text NOT NULL,
+    input_text text NOT NULL,
+    output_json jsonb NOT NULL,
+    latency_ms integer,
+    created_at timestamptz DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- ADMIN OVERRIDES: Manual corrections log
+CREATE TABLE IF NOT EXISTS public.admin_overrides (
+    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    feedback_id uuid REFERENCES public.feedback(id) ON DELETE CASCADE NOT NULL,
+    admin_id uuid REFERENCES public.profiles(id) NOT NULL,
+    field_changed text NOT NULL CHECK (field_changed IN ('category', 'priority')),
+    old_value text,
+    new_value text NOT NULL,
+    reason text,
+    created_at timestamptz DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 
 -- CONSENTS: Legal documents
 CREATE TABLE IF NOT EXISTS public.consents (
@@ -177,6 +218,8 @@ ALTER TABLE public.credit_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.feedback ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.consents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gallery ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_processing_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_overrides ENABLE ROW LEVEL SECURITY;
 
 -- PROFILES
 DROP POLICY IF EXISTS "profiles_select_all" ON public.profiles;
@@ -217,6 +260,20 @@ DROP POLICY IF EXISTS "gallery_select" ON public.gallery;
 CREATE POLICY "gallery_select" ON public.gallery FOR SELECT USING (true);
 DROP POLICY IF EXISTS "gallery_admin" ON public.gallery;
 CREATE POLICY "gallery_admin" ON public.gallery FOR ALL USING (is_staff());
+
+-- AI LOGS & OVERRIDES (Admin only)
+DROP POLICY IF EXISTS "ai_log_admin_all" ON public.ai_processing_log;
+CREATE POLICY "ai_log_admin_all" ON public.ai_processing_log FOR ALL USING (is_staff());
+DROP POLICY IF EXISTS "overrides_admin_all" ON public.admin_overrides;
+CREATE POLICY "overrides_admin_all" ON public.admin_overrides FOR ALL USING (is_staff());
+
+-- FEEDBACK
+DROP POLICY IF EXISTS "feedback_select_own" ON public.feedback;
+CREATE POLICY "feedback_select_own" ON public.feedback FOR SELECT USING (auth.uid() = user_id OR is_staff());
+DROP POLICY IF EXISTS "feedback_insert_own" ON public.feedback;
+CREATE POLICY "feedback_insert_own" ON public.feedback FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "feedback_admin_all" ON public.feedback;
+CREATE POLICY "feedback_admin_all" ON public.feedback FOR ALL USING (is_staff());
 
 -- INDEXES
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles (email);

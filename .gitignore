@@ -7,6 +7,9 @@ node_modules/
 .expo/
 dist/
 web-build/
+.next/
+out/
+build/
 
 # Native
 .kotlin/
@@ -34,6 +37,7 @@ yarn-error.*
 .env.*
 *.env
 .env*.local
+.vercel
 
 # python
 venv/
